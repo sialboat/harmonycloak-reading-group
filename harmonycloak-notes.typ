@@ -307,3 +307,116 @@ TD and FAD to measure perceptual quality
 Eb, UPC, QN, DP to compare real music with generated samples temporally (effectiveness of generator)
 - similar distributions of real and generated samples $==>$ temporal domain metrics should also exhibit proximity wtf does this mean
 
+Experimental Settings: \
+- evaluated on 3 music generative models: MuseGAN, SymphonyNet, and MusicLM.
+- Lakh MIDI Dataset to train generative models and generate unlearnable examples.
+- noise is introduced to only 15% of training dataset by default.
+
+*Results:*
+- Effectiveness evaluated by Training Loss Comparison, Temporal Analysis, Perceptual Analysis
+- Training Loss Comparison: training loss on unlearnable music quickly approaches zero after few iterations in both white and black box settings.
+- Temporal Analysis: Models trained on unlearnable music is significantly lower percentage of EB than models on clean music and even training data
+  - lack of rhythm and structure as a result of training on UEs.
+  - higher UPC for models with UEs.
+    - music is implausible for human listeners.
+  - QN percentage differs per model: notes are either shorter or longer compared to clean musical notes.
+- Perceptual Analysis: All models exhibit lower TD with clean music. All models show higher TD values when trained with UEs.
+
+Perceptual Quality \
+- unlearnable music from black-box has higher TD than that in white-box (lack of direct knowledge in black box setting)
+- FAD scores are similar in quality for both UE and clean music (little perceptual impact)
+
+REsilience against Lossy Compression \
+- Noise generated under $L_p$ norm constraints overwhelm original music's pitch and harmonics, completely masking them out entirely.
+- also gets eliminated by MP3 compression.
+- #smallcaps("HarmonyCloak") generates noise that harmonizes with music frequencies, making them less perceptible. Minimize masking-to-noise ration (MNR) so even after compression, noise maintains characteristcs and preerves unlearnabililty.
+
+Unlearnability on Genre Classification
+- Generated UEs in Rock, included it with learnable classical, country, jazz, and rock samples. Music genre classifier attempts to predict genre of current song.
+- struggles identifying rock.
+- results indicate that generative models have limited knowledge from rock and are trained on other genres, but this doesn't hinder model's to learn other genres.
+
+Impact of Window Size:
+- Shorter window sizes result in steeper loss curves (effectively compresses knowledge that can be learned during training)
+  - shorter window sizes lead to higher FAD scores (low music quality).
+- impat of window size on FAD is minimal.
+- increased noise levels with short window sizes, quality of clean music is relatively the same as that of the UEs.
+
+Impact of Unlearnable Percentages \
+- Do the UEs affect learning process for other clean samples with similar features?
+experiment where varying percentages of rock music were unlearnable, trained MuseGAN with partially unlearnable $cal(D_u)$ and partially clean $cal(D_c)$ (both rock) and clean music from other genres
+- Rock classification declines when 80% of examples are unlearnable (remaining 20% of clean examples is not enough data)
+- sample set with 20% learnable rock music is not enough data for effectivel learning.
+
+- 80% unlearnable pop music reduces genre classifier down to 57.8%
+- 75.1% when only 20% is unlearnable
+  - jazz drops to 65.7%, 59% for country, 47% for classical.
+
+they also placed UEs randomly in their training set for MuseGAN just to see if it really stops learning in its tracks.
+- it turns out that overall learning does decline when analyzing EB, UPC< QN, and DP on generated music.
+- classification models that primarily focus on distinguishing categories. Generative models capture underlying data distribution and learn patterns, structures, and relatinoships wthin training data for new, smimilar outputs.
+  - reduction in proportion of learnable music compromises capacity to generate plausible music
+
+*User Study*
+- listening test with 31 participants (21 male, 10 female) age 25-36, self-identified music lovers.
+- four sets of music clips in randomized order to eliminate bias. Each clip has 30s minimum duration, first set contains clean and UE (black and white)
+- other sets contained foru music samples: 2 from MuseGAN, SymphonyNet, MusicLM on clean music, two from one of those models on unlearnable music
+- rate music based on 5 point likert scale regarding
++ pleasant harmony $(H arrow.t)$
++ plausibility $(P arrow.t)$
++ presence of noise $(N arrow.t)$
++ overall rating $(O R arrow.t)$
+- UEs had a drop in quality with OR scores as low as 2.22 in white-box settings
+
+*Robustness of #smallcaps("HarmonyCloak")*
+- used HarmonyCloak with Spectral Subtraction and Non-negative Matrix Factorization, two popular noise reductiont echniques as well as two defenses (EPIc and DP-InstaHide)
+- SS estimates and subtracts noise spectrum from observed singal
+- NMF is a matrix decomposition for audio source separation and noise reduction
+  - decomposing observed signal into constituent parts lets you isolate noise components and reconstruct cleaner version
+- EPIc detects and eliminates poisoned data
+- DP-InstaHide augments data to eliminate data poisoning
+
+- model trained on clean music is the best
+- noise removal techniques and adaptive defenses still struggles to produce high-quality music even after using them.
+
+*Related Work*
+
+_Generative AI in Music_
+- ILLIA Suite by Hiller
+- AI based music models with neural networks emerged in 1980s with Nierhaus
+- Roberts et al. proposed MuseVAE (hierarchical decode for variational autoencoder (VAE)) to address challenges of modeling long-term structure in sequential data
+- Dhariwal et al. proposed Jukebox, multiscale VQ-VAWE to compress long-context raw audio and uses Autoregressive Transformers to generate high-fidelity songs with music
+- MusicGAN - first multi-track generative model
+- SymphonyNet (Liu et al.) permutation invariant language model for symphonic music using modified Byte Pair Encoding algo
+- Mubert uses a transformer to embed text prompts and select music tags related to encoded prompt to query song generation API
+- Riffuson is stable diffusion model on mel spectrograms of music pieces from msuic-text dataset (generating music based on textual imput)
+- Agostinelli et al. proposed MusicLM
+
+_Unauthorized Data Usage Prevention in AI_
+- Fowl et al. conducted studies showing efficay of adversarial examples in data poisoning. he surpassed previous poisoning methods concerning secure datasets.
+- Yu et al. explores indiscriminate poisoning attacks to prevent unauthorized data exploitation
+  - examining linear separability of sophisticated attack perturbations
+- Preventing third-party training on data without permission: Shan et al. propose privacy protection method using adversarial attacks to add perturbations that are inperceptible to users' data. Model trained on dataset are invalid; protects against unauthorized deep learning models
+- Huang et al. and Fu et al. suggest unlearnable strategies using error-minimizing noise to reduce error of training.
+- Liu et al. improved robustness of unlearnable examples throuhg using data's grayscale knowledge
+- Ren et al. uses Classwise Separability Discriminant (CSD) to enhance transferability of UEs across different settings and datasets
+- Zhao et al. - unlearnable examples for diffusion models using error-minimizing noise strategies
+- Zhang et al. - label-agnostic unlearnable examples with cluster-wise perturbations
+- Liu et al. - Stable unlearnable examples by training defensive noise against Random perturbation instead of adversarial perturbation for defensive noise stability
+- Ye et al. proposes ungeneralizable examples which are trained from maximizing designated distance loss in common space alongside undistillation optimization (wtf are these words)
+
+Other protective techniques:
+- EditShield: method introducing distortions to protect against unauthorized image editing through misleading instruction-guided diffusion
+- Liu et al. MetaCloak uses meta-learning to generate transformation-resistnat perturbations to protect personal data from text-to-image synthesis
+- Shan et al. - Glaze, protect artists from style mimicry from text-to-image diffusion models
+  - introduce perturbations maximizing feature differences from original image
+- Shan et al. - Nightshade - prompt-specific poisoning attack for diffusion-based text-to-image models for concept destabilization
+- Yu et al. AntiFake: adversarial audio system to thwart unauthorized speech synthesis; safeguards integrity of audio content from exploitative AI technologies.
+
+*Discussions and Future Work*
+
+- HarmonyCloak is currently focused on instrumental music, wants to extend to vocal-instrumental compositions
+- Professional Musicians for Deeper Insights: include professionals across various genres and roles for nuanced and expert feedback
+- Broadening Testing ot Multiple compression Formats and platforms: Streaming platforms like YouTube, Spotify, and SoundCloud have their own unique compression algorithms and bitrate settings, could interact weirdly with HarmonyCloak.
+- Ensuring Long-Term Effectiveness against Evolving AI Tech: Future work is focused on strengthening robustness of perturbation-based UEs in music, drawing from lessons in the image domain.
+  - ensures sustained protection of musician's rights and creative works against unauthorized exploitation through sophisticated AI Technologies
