@@ -2,25 +2,33 @@
 
 == Presentation
 - agenda:
-- Issues with data
+- Issue at large
   - disrespect of art within industries
   - disrespect of privacy
   - lack of ownership
   - surveillance
-  - lack of any reason to care
-- Watermarking in AI overview
+- AI & noise-based attacks overview
+  - AI Glossary
+  - Generative Audio
 - HarmonyCloak
+  - Threat Model
+  - Design
+  - Evaluation
 
 == Notes
 
 === Issues at Large
+- Automation outpaces humanity and we do not have enough safeguards
+  - self-driving cars
+  -
 // disrespect of privacy
 // disrespect of art within industries
 // lack of ownership
 // surveillance
 // leadership / politicians are lazy
 
-=== Watermarking in Artificial Intelligence
+=== Noise based Attacks Overview
+-
 
 === HarmonyCloak
 *Introduction:*
@@ -73,7 +81,7 @@ $
 - $f$ is model, $cal(L)$ is cross-entropy loss, noise magnitude bounded by $||delta||_p$.
 - to put it in context for generative models, we have to change things (this is for classification models)
 
-_Comparison of NOise-Based Attacks/Defenses_
+_Comparison of Noise-Based Attacks/Defenses_
 - _Error-maximizing noise_ / adversarial attacks maximize prediction errors in AI during testing phase
   - Adversarial Training allows to enhance model robustness by integrating bad examples (min-max optimization problem)
 - _Data poisoning attacks_ degrade model's performance by tampering with training data
