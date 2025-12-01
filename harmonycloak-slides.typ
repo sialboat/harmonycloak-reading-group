@@ -245,9 +245,13 @@ technology is advancing fast enough to outpace our measures for the displaced
     #set text(16pt)
     #pause  Additionally, given two sounds $A$ and $B$ with similar \
     frequency $(f_A approx f_B)$, we say that $A$ *masks* $B$ if we \
-    can hear $A$ but not $B$.
+    can hear $A$ but not $B$. #footnote()["formally this is known as Auditory Masking"]
     - *Temporal Masking* can also happen if $A$ and $B$ \
       are not played at the same time.
+
+  //https://en.wikipedia.org/wiki/Auditory_masking
+  //The math to calculate each specific threshold for each frequency depends on how loud
+  //the "sound to mask" is in comparison with the "sound that masks"
   ],
 )
 
@@ -346,6 +350,10 @@ technology is advancing fast enough to outpace our measures for the displaced
   + Enjoy a cup of hot chocolate and read your DST Chapters
 ]
 
+// it's important to know there's a distinction here:
+// we train HarmonyCloak on *both* MIDI / Symbolic music
+// and actual audio here
+
 == HarmonyCloak with MIDI
 #slide[
   Given MIDI as input: #pause
@@ -395,7 +403,8 @@ technology is advancing fast enough to outpace our measures for the displaced
   #pause
   _in other words, this is how we mathematically describe the high level stuff we have been building up to_
 
-  // notes have more details as to what the parameters mean.
+  // From the Notes that I took: (I have no idea what most of this means but from the infrences and the places
+  // Perplexity pointed me, the slides are the deductions that I can make based off of this stuff)
   // GAN
   // Find the smallest possible parameter values for the Discriminator(D) to fool the generator (G) that it is fake.
   //$
@@ -407,46 +416,46 @@ technology is advancing fast enough to outpace our measures for the displaced
   //$
   //min_(theta) min_(delta) - log(Pi_(t = 1)^(T) f(x_t|x_(t-1) + delta_(t-1), ... x_(t-p) + delta_(t-p) : theta))
   //$
+  // From my notes, this is the black-box optimization process:
+  // $
+  // min_theta EE [min_delta (sum_(q = 1)^(Q - 1) cal(L)^q_(g e n) f(x + delta})] + alpha sum_(m = 1)^M w^m || alpha^m||_2 \
+  //  "s.t" \
+  //  cal(H)(T_H) <= alpha^m <= x^m forall m in {1, 2, ... M} $
+  //  \ \ \
+  // 
+  // - $f(dot)$ is the generative model
+  // - $cal(L)_(g e n)(dot)$ is generative loss of model
+  // - $T_H$ is absolute human hearing threshold
+  // - $alpha$ is scaling coefficient
+  // - $w^m$ is $1 - "ratio of note velocity of track" m "to cumulative note velocity of all tracks"$
+  //   - for balancing noise intensity added to each instrumental track
+  // - $cal(H)(dot)$ converts dB SPL threshold to note velocity
+  // $
+  //   cal(H)(T_H(v)) = 127 dot 10^(1/4 log_(10)(T_H(v)) - L_U + 94)
+  // $
+  // - $L_U$ is magnitude of lienar transfer function normalized at 1kHz.
+  // - inner minimization tries to find noise that minimizes overall generative loss on unlearnable music
+  // - outer minimization adjusts model parameters $theta$ (or the generator if GAN) to minimize generative model loss
+  // - regularizer term attempts to minimizes overall amplitude of added noise through reducing $L_2$ norm of noise.
+  //   - constraints in the $cal(H)(T_H)$ equation above makes sure that noise gets constrained in the masked regions, sandwiched between the music amplitude and the threshold for hearing.
+
+  // Use Projected Gradient Descent (PGD) as first-order optimization method to solve constrained inner minimization problem.
+  // - Apply Stochastic Gradient Descent (SGD) for outer minimizastion
+
+  // Window based Strategy for Temporal Dynamics \
+  // - Divide the music bar $x$ into short non-overlapping windows during optimization. Each has length $l_w$.
+  //   - for each window $x_t$, find frequency $v^m_t$ of dominant musical note for every track (track $m$) based on cumulative musical note velocities, set defensive noise $delta^m_t$ for window $t$ and track $m$ to same frequency $v^m_t$.
+  //   - if there is no dominant musical note, no noise will be introduced. Noise is introduced uniquely for each instrumental track, so the strategy hinges upon creating defensive noises for each track.
+
+  // Apply to windows using a `sigmoid()` function to constrain $delta^m_t$ to the following range for all $t$ windows $m$ tracks:
+  // $
+  //   cal(H)(T_H(v^m_t)) <= delta^m_t <= cal(M)(x^m_t), forall t, m
+  // $
+  // - $v^m_t$ is dominant frequency, $cal(M)(dot)$ is velocity of dominant musical note at bar $x^m_t$
+
+
 
 ]
-//#slide[
-//  #set align(center)
-//$
-//min_theta EE [min_delta (sum_(q = 1)^(Q - 1) cal(L)^q_(g e n) f(x + delta})] + alpha sum_(m = 1)^M w^m || alpha^m||_2 \
-//  "s.t" \
-//  cal(H)(T_H) <= alpha^m <= x^m forall m in {1, 2, ... M} $
-//  \ \ \
-// ]
-// - $f(dot)$ is the generative model
-// - $cal(L)_(g e n)(dot)$ is generative loss of model
-// - $T_H$ is absolute human hearing threshold
-// - $alpha$ is scaling coefficient
-// - $w^m$ is $1 - "ratio of note velocity of track" m "to cumulative note velocity of all tracks"$
-//   - for balancing noise intensity added to each instrumental track
-// - $cal(H)(dot)$ converts dB SPL threshold to note velocity
-// $
-//   cal(H)(T_H(v)) = 127 dot 10^(1/4 log_(10)(T_H(v)) - L_U + 94)
-// $
-// - $L_U$ is magnitude of lienar transfer function normalized at 1kHz.
-// - inner minimization tries to find noise that minimizes overall generative loss on unlearnable music
-// - outer minimization adjusts model parameters $theta$ (or the generator if GAN) to minimize generative model loss
-// - regularizer term attempts to minimizes overall amplitude of added noise through reducing $L_2$ norm of noise.
-//   - constraints in the $cal(H)(T_H)$ equation above makes sure that noise gets constrained in the masked regions, sandwiched between the music amplitude and the threshold for hearing.
-
-// Use Projected Gradient Descent (PGD) as first-order optimization method to solve constrained inner minimization problem.
-// - Apply Stochastic Gradient Descent (SGD) for outer minimizastion
-
-// Window based Strategy for Temporal Dynamics \
-// - Divide the music bar $x$ into short non-overlapping windows during optimization. Each has length $l_w$.
-//   - for each window $x_t$, find frequency $v^m_t$ of dominant musical note for every track (track $m$) based on cumulative musical note velocities, set defensive noise $delta^m_t$ for window $t$ and track $m$ to same frequency $v^m_t$.
-//   - if there is no dominant musical note, no noise will be introduced. Noise is introduced uniquely for each instrumental track, so the strategy hinges upon creating defensive noises for each track.
-
-// Apply to windows using a `sigmoid()` function to constrain $delta^m_t$ to the following range for all $t$ windows $m$ tracks:
-// $
-//   cal(H)(T_H(v^m_t)) <= delta^m_t <= cal(M)(x^m_t), forall t, m
-// $
-// - $v^m_t$ is dominant frequency, $cal(M)(dot)$ is velocity of dominant musical note at bar $x^m_t$
-
 
 == Evaluation
 #slide[
@@ -473,3 +482,12 @@ technology is advancing fast enough to outpace our measures for the displaced
 ]
 
 = thanks\\
+
+// further reading can be found in the HarmonyCloak paper
+// also check out Benn Jordan's video on AI Music Malware,
+// as he describes in detail how adversarial noise attacks
+// can be used to further gaslight Generative Audio models.
+// Similarly, his videos on hacking into Surveillance Cameras
+// can be another watch to show applications outside of Music
+// Technology. Hopefully the source is useful for those who want to read it!
+// - Silas
