@@ -16,20 +16,6 @@
   - Evaluation
 
 == Notes
-
-=== Issues at Large
-- Automation outpaces humanity and we do not have enough safeguards
-  - self-driving cars
-  -
-// disrespect of privacy
-// disrespect of art within industries
-// lack of ownership
-// surveillance
-// leadership / politicians are lazy
-
-=== Noise based Attacks Overview
--
-
 === HarmonyCloak
 *Introduction:*
 - DALL-E, Chat-GPT, etc. has revolutionized various domains.
