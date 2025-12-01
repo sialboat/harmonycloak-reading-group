@@ -365,6 +365,7 @@ technology is advancing fast enough to outpace our measures for the displaced
   + _Conduct a STFT to obtain dominant frequencies in dB SPL_ #pause
   + _After finding the relative dB SPL, _ introduce the noise component #pause
     - No louder than the masking noise, no softer than the absolute hearing threshold. #pause
+  + _FFT your results back into the Time Domain_ #pause
   + Enjoy a cup of hot chocolate and work on your GenAudio Projects
 ]
 
